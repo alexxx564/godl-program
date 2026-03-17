@@ -262,22 +262,22 @@ pub fn process_reset_v3(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRe
         round.motherlode = treasury.motherlode - rollover_amount;
         treasury.motherlode = rollover_amount;
 
-        let sol_motherlode_amount = sol_motherlode.amount;
+        let sol_motherlode_payout = sol_motherlode.amount;
 
-        // Transfer SOL from sol motherlode to treasury.
-        if  sol_motherlode_amount > 0 {
-            round.total_winnings += sol_motherlode_amount;
-            sol_motherlode_info.send(sol_motherlode_amount, &round_info);
+        // Transfer SOL from sol motherlode to round for distribution.
+        if sol_motherlode_payout > 0 {
+            round.total_winnings += sol_motherlode_payout;
+            sol_motherlode_info.send(sol_motherlode_payout, &round_info);
             sol_motherlode.amount = 0;
         }
     }
 
     // Payout the mini motherlode if it was activated. (drops only SOL, no GODL)
     if round.did_hit_mini_motherlode(r) {
-        let sol_motherlode_amount = sol_motherlode.amount;
-        if  sol_motherlode_amount > 0 {
-            round.total_winnings += sol_motherlode_amount;
-            sol_motherlode_info.send(sol_motherlode_amount, &round_info);
+        let sol_motherlode_payout = sol_motherlode.amount;
+        if sol_motherlode_payout > 0 {
+            round.total_winnings += sol_motherlode_payout;
+            sol_motherlode_info.send(sol_motherlode_payout, &round_info);
             sol_motherlode.amount = 0;
         }
     }

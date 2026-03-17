@@ -83,6 +83,10 @@ pub fn process_deploy_v3(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRe
         is_pooled = automation_v2.get_is_pooled();
         Some(automation_v2)
     } else {
+        // Without automation, the signer must be the authority.
+        if signer_info.key != authority_info.key {
+            return Err(GodlError::NotAuthorized.into());
+        }
         None
     };
 

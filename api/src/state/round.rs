@@ -84,7 +84,7 @@ impl Round {
     }
 
     pub fn is_split_reward(&self, rng: u64) -> bool {
-        // One out of four rounds get split rewards.
+        // One out of two rounds get split rewards.
         let rng = rng.reverse_bits().to_le_bytes();
         let r1 = u16::from_le_bytes(rng[0..2].try_into().unwrap());
         let r2 = u16::from_le_bytes(rng[2..4].try_into().unwrap());

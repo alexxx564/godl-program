@@ -5,12 +5,15 @@ use steel::*;
 pub enum GodlInstruction {
     // Miner
     Initialize = 1,
+    /// Deprecated: Use `CheckpointV3` instead. Always returns `InvalidInstructionData`.
     Checkpoint = 2,
     ClaimSOL = 3,
     ClaimGODL = 4,
     InjectUnrefinedRewards = 41,
+    /// Deprecated: Use `CloseV2` instead. Always returns `InvalidInstructionData`.
     Close = 5,
     Log = 8,
+    /// Deprecated: Use `ResetV3` instead. Always returns `InvalidInstructionData`.
     ResetV2 = 31,
 
     // Staker
@@ -38,6 +41,7 @@ pub enum GodlInstruction {
     // New instructions
     AutomateV2 = 26,
     ClaimSOLAndFundAutomation = 27,
+    /// Deprecated: Use `DeployV3` instead. Always returns `InvalidInstructionData`.
     DeployV2 = 28,
     FundAutomation = 29,
     BuryTokens = 30,
