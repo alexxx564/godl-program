@@ -1,0 +1,95 @@
+mod initialize;
+mod automation;
+mod miner;
+mod stake;
+mod stake_v2;
+mod referral;
+mod admin;
+
+use initialize::*;
+use automation::*;
+use miner::*;
+use stake::*;
+use stake_v2::*;
+use referral::*;
+use admin::*;
+
+use godl_api::instruction::*;
+use steel::*;
+
+pub fn process_instruction(
+    program_id: &Pubkey,
+    accounts: &[AccountInfo],
+    data: &[u8],
+) -> ProgramResult {
+    let (ix, data) = parse_instruction(&godl_api::ID, program_id, data)?;
+
+    match ix {
+        GodlInstruction::Initialize => process_initialize(accounts, data)?,
+
+        // Miner
+        GodlInstruction::AutomateV2 => process_automate_v2(accounts, data)?,
+        GodlInstruction::AutomateV3 => process_automate_v3(accounts, data)?,
+        GodlInstruction::Checkpoint => process_checkpoint(accounts, data)?,
+        GodlInstruction::CheckpointV3 => process_checkpoint_v3(accounts, data)?,
+        GodlInstruction::ClaimSOL => process_claim_sol(accounts, data)?,
+        GodlInstruction::ClaimSOLAndFundAutomation => {
+            process_claim_sol_and_fund_automation(accounts, data)?
+        }
+        GodlInstruction::FundAutomation => process_fund_automation(accounts, data)?,
+        GodlInstruction::ClaimGODL => process_claim_godl(accounts, data)?,
+        GodlInstruction::InjectUnrefinedRewards => {
+            process_inject_unrefined_rewards(accounts, data)?
+        }
+        GodlInstruction::InitializeReferrer => process_initialize_referrer(accounts, data)?,
+        GodlInstruction::SetReferrer => process_set_referrer(accounts, data)?,
+        GodlInstruction::ClaimReferral => process_claim_referral(accounts, data)?,
+        GodlInstruction::DeployV2 => process_deploy_v2(accounts, data)?,
+        GodlInstruction::DeployV3 => process_deploy_v3(accounts, data)?,
+        GodlInstruction::Log => process_log(accounts, data)?,
+        GodlInstruction::Close => process_close(accounts, data)?,
+        GodlInstruction::CloseV2 => process_close_v2(accounts, data)?,
+        GodlInstruction::ResetV2 => process_reset_v2(accounts, data)?,
+        GodlInstruction::ResetV3 => process_reset_v3(accounts, data)?,
+
+        // Staker
+        GodlInstruction::Deposit => process_deposit(accounts, data)?,
+        GodlInstruction::Withdraw => process_withdraw(accounts, data)?,
+        GodlInstruction::ClaimYield => process_claim_yield(accounts, data)?,
+
+        // Stake V2
+        GodlInstruction::DepositV2 => process_deposit_v2(accounts, data)?,
+        GodlInstruction::WithdrawV2 => process_withdraw_v2(accounts, data)?,
+        GodlInstruction::ClaimYieldV2 => process_claim_yield_v2(accounts, data)?,
+        GodlInstruction::CompoundYieldV2 => process_compound_yield_v2(accounts, data)?,
+        GodlInstruction::SetStakeExecutorV2 => process_set_stake_executor_v2(accounts, data)?,
+        GodlInstruction::StakeNft => process_stake_nft(accounts, data)?,
+        GodlInstruction::UnstakeNft => process_unstake_nft(accounts, data)?,
+
+        // Admin
+        GodlInstruction::Bury => process_bury(accounts, data)?,
+        GodlInstruction::BuryTokens => process_bury_tokens(accounts, data)?,
+        GodlInstruction::PreBury => process_pre_bury(accounts, data)?,
+        GodlInstruction::SetAdmin => process_set_admin(accounts, data)?,
+        GodlInstruction::SetFeeCollector => process_set_fee_collector(accounts, data)?,
+        GodlInstruction::SetSwapProgram => process_set_swap_program(accounts, data)?,
+        GodlInstruction::SetVarAddress => process_set_var_address(accounts, data)?,
+        GodlInstruction::NewVar => process_new_var(accounts, data)?,
+        GodlInstruction::SetMotherlodeDenominator => {
+            process_set_motherlode_denominator(accounts, data)?
+        }
+        GodlInstruction::SetGodlPerRound => process_set_godl_per_round(accounts, data)?,
+        GodlInstruction::WithdrawVault => process_withdraw_vault(accounts, data)?,
+        GodlInstruction::InitializeSolMotherlode => {
+            process_initialize_sol_motherlode(accounts, data)?
+        }
+        GodlInstruction::InjectGodlMotherlode => {
+            process_inject_godl_motherlode(accounts, data)?
+        }
+
+    }
+
+    Ok(())
+}
+
+entrypoint!(process_instruction);

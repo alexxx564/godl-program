@@ -1,0 +1,3 @@
+[submodule "entropy-program"]
+	path = entropy-program
+	url = https://github.com/oxapo11o/entropy-program.git

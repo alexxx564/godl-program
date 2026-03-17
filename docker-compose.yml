@@ -1,0 +1,18 @@
+services:
+  bury:
+    build: .
+    entrypoint: ["/app/cli"]
+    command: ["bury-listen", "--amount", "0.4"]
+    env_file: .env
+    volumes:
+      - ./wallets:${PWD}/wallets:ro
+    restart: on-failure
+
+  autominer:
+    build: .
+    entrypoint: ["/app/autominer_v3"]
+    command: []
+    env_file: .env
+    volumes:
+      - ./wallets:${PWD}/wallets:ro
+    restart: on-failure

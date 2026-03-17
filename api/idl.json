@@ -1,0 +1,1024 @@
+{
+  "version": "3.8.0",
+  "name": "godl",
+  "instructions": [
+    {
+      "name": "automateV2",
+      "discriminant": { "type": "u8", "value": 26 },
+      "docs": [
+        "Configures or closes an automation_v2 account.",
+        "Automation PDA seeds: [\"automation_v2\", authority].",
+        "Miner PDA seeds: [\"miner\", authority].",
+        "Set claim_and_fund to 1 to allow executors to auto-fund from claims."
+      ],
+      "accounts": [
+        { "name": "signer", "isMut": true, "isSigner": true },
+        { "name": "automationV2", "isMut": true, "isSigner": false },
+        { "name": "executor", "isMut": false, "isSigner": false },
+        { "name": "miner", "isMut": true, "isSigner": false },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        { "name": "amount", "type": "u64" },
+        { "name": "deposit", "type": "u64" },
+        { "name": "fee", "type": "u64" },
+        { "name": "mask", "type": "u64" },
+        { "name": "strategy", "type": "u8" },
+        { "name": "claimAndFund", "type": "u8" }
+      ]
+    },
+    {
+      "name": "automateV3",
+      "discriminant": { "type": "u8", "value": 37 },
+      "docs": [
+        "Configures or closes an automation_v2 account with pooled deployment metadata.",
+        "Automation PDA seeds: [\"automation_v2\", authority].",
+        "Miner PDA seeds: [\"miner\", authority].",
+        "Pool member PDA seeds: [\"pool_member\", authority]."
+      ],
+      "accounts": [
+        { "name": "signer", "isMut": true, "isSigner": true },
+        { "name": "automationV2", "isMut": true, "isSigner": false },
+        { "name": "executor", "isMut": false, "isSigner": false },
+        { "name": "miner", "isMut": true, "isSigner": false },
+        { "name": "poolMember", "isMut": true, "isSigner": false },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        { "name": "amount", "type": "u64" },
+        { "name": "deposit", "type": "u64" },
+        { "name": "fee", "type": "u64" },
+        { "name": "mask", "type": "u64" },
+        { "name": "strategy", "type": "u8" },
+        { "name": "claimAndFund", "type": "u8" },
+        { "name": "isPooled", "type": "u8" }
+      ]
+    },
+    {
+      "name": "deployV2",
+      "discriminant": { "type": "u8", "value": 28 },
+      "docs": [
+        "Deploys SOL to selected squares for the current round (automation_v2).",
+        "Automation PDA seeds: [\"automation_v2\", authority].",
+        "Miner PDA seeds: [\"miner\", authority].",
+        "Round PDA seeds: [\"round\", board.round_id]."
+      ],
+      "accounts": [
+        { "name": "signer", "isMut": true, "isSigner": true },
+        { "name": "authority", "isMut": true, "isSigner": false },
+        { "name": "automationV2", "isMut": true, "isSigner": false },
+        { "name": "board", "isMut": true, "isSigner": false },
+        { "name": "miner", "isMut": true, "isSigner": false },
+        { "name": "round", "isMut": true, "isSigner": false },
+        { "name": "config", "isMut": false, "isSigner": false },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "11111111111111111111111111111111"
+        },
+        { "name": "entropyVar", "isMut": true, "isSigner": false },
+        {
+          "name": "entropyProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "rngJSm78htuZREU5F3tb3JKnYSaPx1nMHZxyvNNFmxy"
+        }
+      ],
+      "args": [
+        { "name": "amount", "type": "u64" },
+        { "name": "squares", "type": "u32" }
+      ]
+    },
+    {
+      "name": "deployV3",
+      "discriminant": { "type": "u8", "value": 33 },
+      "docs": [
+        "Deploys SOL to selected squares with optional pooling for the current round.",
+        "Automation PDA seeds: [\"automation_v2\", authority].",
+        "Pool round PDA seeds: [\"pool_round\", board.round_id].",
+        "Pool member PDA seeds: [\"pool_member\", authority]."
+      ],
+      "accounts": [
+        { "name": "signer", "isMut": true, "isSigner": true },
+        { "name": "authority", "isMut": true, "isSigner": false },
+        { "name": "automationV2", "isMut": true, "isSigner": false },
+        { "name": "board", "isMut": true, "isSigner": false },
+        { "name": "miner", "isMut": true, "isSigner": false },
+        { "name": "round", "isMut": true, "isSigner": false },
+        { "name": "poolRound", "isMut": true, "isSigner": false },
+        { "name": "poolMember", "isMut": true, "isSigner": false },
+        { "name": "config", "isMut": false, "isSigner": false },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "11111111111111111111111111111111"
+        },
+        { "name": "entropyVar", "isMut": true, "isSigner": false },
+        {
+          "name": "entropyProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "rngJSm78htuZREU5F3tb3JKnYSaPx1nMHZxyvNNFmxy"
+        }
+      ],
+      "args": [
+        { "name": "amount", "type": "u64" },
+        { "name": "squares", "type": "u32" },
+        { "name": "isPooled", "type": "u8" }
+      ]
+    },
+    {
+      "name": "resetV2",
+      "discriminant": { "type": "u8", "value": 31 },
+      "docs": [
+        "Finalizes the round, tracks the SOL motherlode, and opens the next round.",
+        "Board PDA seeds: [\"board\"].",
+        "Treasury PDA seeds: [\"treasury\"].",
+        "Round PDA seeds: [\"round\", board.round_id] and [\"round\", board.round_id + 1]."
+      ],
+      "accounts": [
+        { "name": "signer", "isMut": true, "isSigner": true },
+        { "name": "board", "isMut": true, "isSigner": false },
+        { "name": "config", "isMut": false, "isSigner": false },
+        { "name": "feeCollector", "isMut": true, "isSigner": false },
+        {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": false,
+          "address": "GodL6KZ9uuUoQwELggtVzQkKmU1LfqmDokPibPeDKkhF"
+        },
+        { "name": "round", "isMut": true, "isSigner": false },
+        { "name": "roundNext", "isMut": true, "isSigner": false },
+        { "name": "topMiner", "isMut": false, "isSigner": false },
+        { "name": "solMotherlode", "isMut": true, "isSigner": false },
+        { "name": "treasury", "isMut": true, "isSigner": false },
+        { "name": "treasuryTokens", "isMut": true, "isSigner": false },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "godlProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "mineWsRs2Rmw2jPMkVbgAbDjV1E23yQ8TEodaX3iza4"
+        },
+        {
+          "name": "slotHashesSysvar",
+          "isMut": false,
+          "isSigner": false,
+          "address": "SysvarS1otHashes111111111111111111111111111"
+        },
+        { "name": "entropyVar", "isMut": true, "isSigner": false },
+        {
+          "name": "entropyProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "rngJSm78htuZREU5F3tb3JKnYSaPx1nMHZxyvNNFmxy"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "checkpointV3",
+      "discriminant": { "type": "u8", "value": 34 },
+      "docs": [
+        "Checkpoint rewards for a miner, optionally distributing pooled top-mine rewards.",
+        "Pool round PDA seeds: [\"pool_round\", miner.round_id].",
+        "Pool member PDA seeds: [\"pool_member\", authority]."
+      ],
+      "accounts": [
+        { "name": "signer", "isMut": true, "isSigner": true },
+        { "name": "board", "isMut": true, "isSigner": false },
+        { "name": "miner", "isMut": true, "isSigner": false },
+        { "name": "round", "isMut": true, "isSigner": false },
+        { "name": "treasury", "isMut": true, "isSigner": false },
+        { "name": "poolRound", "isMut": true, "isSigner": false },
+        { "name": "poolMember", "isMut": true, "isSigner": false },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "resetV3",
+      "discriminant": { "type": "u8", "value": 35 },
+      "docs": [
+        "Finalizes the round and optionally redirects top miner rewards to the pool.",
+        "Requires the winning miner and corresponding pool member to validate pooled wins."
+      ],
+      "accounts": [
+        { "name": "signer", "isMut": true, "isSigner": true },
+        { "name": "board", "isMut": true, "isSigner": false },
+        { "name": "config", "isMut": false, "isSigner": false },
+        { "name": "feeCollector", "isMut": true, "isSigner": false },
+        {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": false,
+          "address": "GodL6KZ9uuUoQwELggtVzQkKmU1LfqmDokPibPeDKkhF"
+        },
+        { "name": "round", "isMut": true, "isSigner": false },
+        { "name": "roundNext", "isMut": true, "isSigner": false },
+        { "name": "poolRoundNext", "isMut": true, "isSigner": false },
+        { "name": "topMiner", "isMut": true, "isSigner": false },
+        { "name": "topMinerPoolMember", "isMut": false, "isSigner": false },
+        { "name": "solMotherlode", "isMut": true, "isSigner": false },
+        { "name": "treasury", "isMut": true, "isSigner": false },
+        { "name": "treasuryTokens", "isMut": true, "isSigner": false },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "godlProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "mineWsRs2Rmw2jPMkVbgAbDjV1E23yQ8TEodaX3iza4"
+        },
+        {
+          "name": "slotHashesSysvar",
+          "isMut": false,
+          "isSigner": false,
+          "address": "SysvarS1otHashes111111111111111111111111111"
+        },
+        { "name": "entropyVar", "isMut": true, "isSigner": false },
+        {
+          "name": "entropyProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "rngJSm78htuZREU5F3tb3JKnYSaPx1nMHZxyvNNFmxy"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "closeV2",
+      "discriminant": { "type": "u8", "value": 36 },
+      "docs": [
+        "Closes an expired round and its pool round, returning rent to the payer."
+      ],
+      "accounts": [
+        { "name": "signer", "isMut": true, "isSigner": true },
+        { "name": "board", "isMut": true, "isSigner": false },
+        { "name": "rentPayer", "isMut": true, "isSigner": false },
+        { "name": "round", "isMut": true, "isSigner": false },
+        { "name": "poolRound", "isMut": true, "isSigner": false },
+        { "name": "treasury", "isMut": true, "isSigner": false },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "injectUnrefinedRewards",
+      "discriminant": { "type": "u8", "value": 41 },
+      "docs": [
+        "Adds unrefined GODL rewards to a miner on behalf of the bury authority.",
+        "Miner PDA seeds: [\"miner\", miner.authority]."
+      ],
+      "accounts": [
+        { "name": "signer", "isMut": true, "isSigner": true },
+        { "name": "config", "isMut": false, "isSigner": false },
+        { "name": "miner", "isMut": true, "isSigner": false },
+        { "name": "treasury", "isMut": true, "isSigner": false },
+        { "name": "signerTokens", "isMut": true, "isSigner": false },
+        { "name": "treasuryTokens", "isMut": true, "isSigner": false },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [{ "name": "amount", "type": "u64" }]
+    },
+    {
+      "name": "depositV2",
+      "discriminant": { "type": "u8", "value": 38 },
+      "docs": [
+        "Deposits GODL into a stake_v2 position with optional lock multiplier.",
+        "Stake PDA seeds: [\"stake_v2\", signer, id].",
+        "Treasury PDA seeds: [\"treasury\"]."
+      ],
+      "accounts": [
+        { "name": "signer", "isMut": true, "isSigner": true },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "address": "GodL6KZ9uuUoQwELggtVzQkKmU1LfqmDokPibPeDKkhF"
+        },
+        { "name": "sender", "isMut": true, "isSigner": false },
+        { "name": "stake", "isMut": true, "isSigner": false },
+        { "name": "stakeTokens", "isMut": true, "isSigner": false },
+        { "name": "treasury", "isMut": true, "isSigner": false },
+        { "name": "executor", "isMut": false, "isSigner": false },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        { "name": "associatedTokenProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "id", "type": "u64" },
+        { "name": "amount", "type": "u64" },
+        { "name": "lockDuration", "type": "i64" }
+      ]
+    },
+    {
+      "name": "withdrawV2",
+      "discriminant": { "type": "u8", "value": 39 },
+      "docs": [
+        "Withdraws unlocked GODL from a stake_v2 position.",
+        "Stake PDA seeds: [\"stake_v2\", signer, id]."
+      ],
+      "accounts": [
+        { "name": "signer", "isMut": true, "isSigner": true },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "address": "GodL6KZ9uuUoQwELggtVzQkKmU1LfqmDokPibPeDKkhF"
+        },
+        { "name": "recipient", "isMut": true, "isSigner": false },
+        { "name": "stake", "isMut": true, "isSigner": false },
+        { "name": "stakeTokens", "isMut": true, "isSigner": false },
+        { "name": "treasury", "isMut": true, "isSigner": false },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        { "name": "associatedTokenProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "id", "type": "u64" },
+        { "name": "amount", "type": "u64" }
+      ]
+    },
+    {
+      "name": "claimYieldV2",
+      "discriminant": { "type": "u8", "value": 40 },
+      "docs": [
+        "Claims accrued GODL rewards from a stake_v2 position to the signer.",
+        "Stake PDA seeds: [\"stake_v2\", signer, id].",
+        "Treasury PDA seeds: [\"treasury\"]."
+      ],
+      "accounts": [
+        { "name": "signer", "isMut": true, "isSigner": true },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "address": "GodL6KZ9uuUoQwELggtVzQkKmU1LfqmDokPibPeDKkhF"
+        },
+        { "name": "recipient", "isMut": true, "isSigner": false },
+        { "name": "stake", "isMut": true, "isSigner": false },
+        { "name": "treasury", "isMut": true, "isSigner": false },
+        { "name": "treasuryTokens", "isMut": true, "isSigner": false },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        { "name": "associatedTokenProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "id", "type": "u64" },
+        { "name": "amount", "type": "u64" }
+      ]
+    },
+    {
+      "name": "compoundYieldV2",
+      "discriminant": { "type": "u8", "value": 42 },
+      "docs": [
+        "Claims rewards from a stake_v2 position and redeposits them into the same stake.",
+        "Stake PDA seeds: [\"stake_v2\", stake.authority, id].",
+        "Treasury PDA seeds: [\"treasury\"]."
+      ],
+      "accounts": [
+        { "name": "signer", "isMut": true, "isSigner": true },
+        {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": false,
+          "address": "GodL6KZ9uuUoQwELggtVzQkKmU1LfqmDokPibPeDKkhF"
+        },
+        { "name": "stake", "isMut": true, "isSigner": false },
+        { "name": "stakeTokens", "isMut": true, "isSigner": false },
+        { "name": "treasury", "isMut": true, "isSigner": false },
+        { "name": "treasuryTokens", "isMut": true, "isSigner": false },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        { "name": "associatedTokenProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [{ "name": "id", "type": "u64" }]
+    },
+    {
+      "name": "setStakeExecutorV2",
+      "discriminant": { "type": "u8", "value": 43 },
+      "docs": [
+        "Updates the delegated executor for an existing stake_v2 position.",
+        "Stake PDA seeds: [\"stake_v2\", signer, id]."
+      ],
+      "accounts": [
+        { "name": "signer", "isMut": true, "isSigner": true },
+        { "name": "stake", "isMut": true, "isSigner": false }
+      ],
+      "args": [
+        { "name": "id", "type": "u64" },
+        { "name": "executor", "type": "publicKey" }
+      ]
+    },
+    {
+      "name": "buryTokens",
+      "discriminant": { "type": "u8", "value": 30 },
+      "docs": [
+        "Shares GODL with stakers and admin, then burns the rest (manual bury).",
+        "Admin address: ADMIN_GODL_FEE.",
+        "Treasury PDA seeds: [\"treasury\"].",
+        "If warchest is provided (non-default), tokens are sent there instead of burned."
+      ],
+      "accounts": [
+        { "name": "signer", "isMut": true, "isSigner": true },
+        { "name": "board", "isMut": true, "isSigner": false },
+        { "name": "config", "isMut": false, "isSigner": false },
+        {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": false,
+          "address": "GodL6KZ9uuUoQwELggtVzQkKmU1LfqmDokPibPeDKkhF"
+        },
+        { "name": "treasury", "isMut": true, "isSigner": false },
+        { "name": "treasuryGodl", "isMut": true, "isSigner": false },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": false,
+          "address": "24vRA7Wh97HPRYiwD5WgiNGYeKdtG9Ajz73cJdg2ZGhR"
+        },
+        { "name": "adminGodl", "isMut": true, "isSigner": false },
+        { "name": "warchest", "isMut": false, "isSigner": false },
+        { "name": "warchestGodl", "isMut": true, "isSigner": false },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "godlProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "mineWsRs2Rmw2jPMkVbgAbDjV1E23yQ8TEodaX3iza4"
+        }
+      ],
+      "args": [{ "name": "amount", "type": "u64" }]
+    },
+    {
+      "name": "injectGodlMotherlode",
+      "discriminant": { "type": "u8", "value": 44 },
+      "docs": [
+        "Injects GODL into the motherlode rewards pool. Can be called by anyone.",
+        "Treasury PDA seeds: [\"treasury\"]."
+      ],
+      "accounts": [
+        { "name": "signer", "isMut": true, "isSigner": true },
+        { "name": "treasury", "isMut": true, "isSigner": false },
+        { "name": "signerTokens", "isMut": true, "isSigner": false },
+        { "name": "treasuryTokens", "isMut": true, "isSigner": false },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [{ "name": "amount", "type": "u64" }]
+    },
+    {
+      "name": "stakeNft",
+      "discriminant": { "type": "u8", "value": 45 },
+      "docs": [
+        "Stakes a Metaplex Core NFT from the boost collection to a stake_v2 account,",
+        "granting a 10% boost to the stake weight.",
+        "Stake PDA seeds: [\"stake_v2\", signer, id].",
+        "Collection address: DTzRfkhPq73e1m3Fwu7AMPie5aNWwMGQMMxgdBhGATgY."
+      ],
+      "accounts": [
+        { "name": "signer", "isMut": true, "isSigner": true },
+        { "name": "asset", "isMut": true, "isSigner": false },
+        {
+          "name": "collection",
+          "isMut": false,
+          "isSigner": false,
+          "address": "DTzRfkhPq73e1m3Fwu7AMPie5aNWwMGQMMxgdBhGATgY"
+        },
+        { "name": "stake", "isMut": true, "isSigner": false },
+        { "name": "treasury", "isMut": true, "isSigner": false },
+        {
+          "name": "mplCoreProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [{ "name": "id", "type": "u64" }]
+    },
+    {
+      "name": "unstakeNft",
+      "discriminant": { "type": "u8", "value": 46 },
+      "docs": [
+        "Unstakes a Metaplex Core NFT from a stake_v2 account, returning it to the",
+        "authority and removing the 10% stake weight boost.",
+        "Stake PDA seeds: [\"stake_v2\", signer, id]."
+      ],
+      "accounts": [
+        { "name": "signer", "isMut": true, "isSigner": true },
+        { "name": "asset", "isMut": true, "isSigner": false },
+        {
+          "name": "collection",
+          "isMut": false,
+          "isSigner": false,
+          "address": "DTzRfkhPq73e1m3Fwu7AMPie5aNWwMGQMMxgdBhGATgY"
+        },
+        { "name": "stake", "isMut": true, "isSigner": false },
+        { "name": "treasury", "isMut": true, "isSigner": false },
+        {
+          "name": "mplCoreProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [{ "name": "id", "type": "u64" }]
+    },
+    {
+      "name": "bury",
+      "discriminant": { "type": "u8", "value": 13 },
+      "docs": [
+        "Swaps vaulted SOL to GODL, shares with stakers/admin, and burns the rest.",
+        "Admin address: ADMIN_GODL_FEE.",
+        "Additional remaining accounts are forwarded to the configured swap program.",
+        "Treasury PDA seeds: [\"treasury\"].",
+        "If warchest is provided (non-default), tokens are sent there instead of burned."
+      ],
+      "accounts": [
+        { "name": "signer", "isMut": true, "isSigner": true },
+        { "name": "board", "isMut": true, "isSigner": false },
+        { "name": "config", "isMut": false, "isSigner": false },
+        {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": false,
+          "address": "GodL6KZ9uuUoQwELggtVzQkKmU1LfqmDokPibPeDKkhF"
+        },
+        { "name": "treasury", "isMut": true, "isSigner": false },
+        { "name": "treasuryGodl", "isMut": true, "isSigner": false },
+        { "name": "treasurySol", "isMut": true, "isSigner": false },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": false,
+          "address": "24vRA7Wh97HPRYiwD5WgiNGYeKdtG9Ajz73cJdg2ZGhR"
+        },
+        { "name": "adminGodl", "isMut": true, "isSigner": false },
+        { "name": "warchest", "isMut": false, "isSigner": false },
+        { "name": "warchestGodl", "isMut": true, "isSigner": false },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "godlProgram",
+          "isMut": false,
+          "isSigner": false,
+          "address": "mineWsRs2Rmw2jPMkVbgAbDjV1E23yQ8TEodaX3iza4"
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Automation",
+      "discriminator": [100, 0, 0, 0, 0, 0, 0, 0],
+      "docs": ["Automation parameters for automated mining deployments."],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "amount", "type": "u64" },
+          { "name": "authority", "type": "publicKey" },
+          { "name": "balance", "type": "u64" },
+          { "name": "executor", "type": "publicKey" },
+          { "name": "fee", "type": "u64" },
+          { "name": "strategy", "type": "u64" },
+          { "name": "mask", "type": "u64" }
+        ]
+      }
+    },
+    {
+      "name": "AutomationV2",
+      "discriminator": [111, 0, 0, 0, 0, 0, 0, 0],
+      "docs": ["Packed automation configuration for v2 executors."],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "amount", "type": "u64" },
+          { "name": "authority", "type": "publicKey" },
+          { "name": "balance", "type": "u64" },
+          { "name": "executor", "type": "publicKey" },
+          { "name": "fee", "type": "u64" },
+          { "name": "config", "type": "u64" },
+          { "name": "mask", "type": "u64" }
+        ]
+      }
+    },
+    {
+      "name": "Config",
+      "discriminator": [101, 0, 0, 0, 0, 0, 0, 0],
+      "docs": ["Program configuration state."],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "admin", "type": "publicKey" },
+          { "name": "godl_per_round", "type": "u64" },
+          { "name": "bury_authority", "type": "publicKey" },
+          { "name": "fee_collector", "type": "publicKey" },
+          { "name": "swap_program", "type": "publicKey" },
+          { "name": "var_address", "type": "publicKey" },
+          { "name": "motherlode_denominator", "type": "u64" }
+        ]
+      }
+    },
+    {
+      "name": "Miner",
+      "discriminator": [103, 0, 0, 0, 0, 0, 0, 0],
+      "docs": ["Tracks a miner's deployed SOL and reward balances."],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "authority", "type": "publicKey" },
+          { "name": "referrer", "type": "publicKey" },
+          { "name": "deployed", "type": { "array": ["u64", 25] } },
+          { "name": "cumulative", "type": { "array": ["u64", 25] } },
+          { "name": "checkpoint_fee", "type": "u64" },
+          { "name": "checkpoint_id", "type": "u64" },
+          { "name": "last_claim_godl_at", "type": "i64" },
+          { "name": "last_claim_sol_at", "type": "i64" },
+          { "name": "rewards_factor", "type": { "defined": "Numeric" } },
+          { "name": "rewards_sol", "type": "u64" },
+          { "name": "rewards_godl", "type": "u64" },
+          { "name": "refined_godl", "type": "u64" },
+          { "name": "round_id", "type": "u64" },
+          { "name": "lifetime_deployed", "type": "u64" },
+          { "name": "lifetime_rewards_sol", "type": "u64" },
+          { "name": "lifetime_rewards_godl", "type": "u64" }
+        ]
+      }
+    },
+    {
+      "name": "Treasury",
+      "discriminator": [104, 0, 0, 0, 0, 0, 0, 0],
+      "docs": ["Singleton treasury account tracking protocol balances."],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "balance", "type": "u64" },
+          { "name": "motherlode", "type": "u64" },
+          { "name": "miner_rewards_factor", "type": { "defined": "Numeric" } },
+          { "name": "stake_rewards_factor", "type": { "defined": "Numeric" } },
+          { "name": "total_staked", "type": "u64" },
+          { "name": "total_unclaimed", "type": "u64" },
+          { "name": "total_refined", "type": "u64" }
+        ]
+      }
+    },
+    {
+      "name": "Board",
+      "discriminator": [105, 0, 0, 0, 0, 0, 0, 0],
+      "docs": ["Global round tracking for the mining game."],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "round_id", "type": "u64" },
+          { "name": "start_slot", "type": "u64" },
+          { "name": "end_slot", "type": "u64" }
+        ]
+      }
+    },
+    {
+      "name": "Stake",
+      "discriminator": [108, 0, 0, 0, 0, 0, 0, 0],
+      "docs": ["State for a staking participant."],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "authority", "type": "publicKey" },
+          { "name": "balance", "type": "u64" },
+          { "name": "last_claim_at", "type": "i64" },
+          { "name": "last_deposit_at", "type": "i64" },
+          { "name": "last_withdraw_at", "type": "i64" },
+          { "name": "rewards_factor", "type": { "defined": "Numeric" } },
+          { "name": "rewards", "type": "u64" },
+          { "name": "lifetime_rewards", "type": "u64" },
+          { "name": "is_seeker", "type": "u64" }
+        ]
+      }
+    },
+    {
+      "name": "StakeV2",
+      "discriminator": [115, 0, 0, 0, 0, 0, 0, 0],
+      "docs": [
+        "State for a lockable stake with multiplier and delegated executor."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "id", "type": "u64" },
+          { "name": "authority", "type": "publicKey" },
+          { "name": "balance", "type": "u64" },
+          { "name": "last_claim_at", "type": "i64" },
+          { "name": "last_deposit_at", "type": "i64" },
+          { "name": "last_withdraw_at", "type": "i64" },
+          { "name": "rewards_factor", "type": { "defined": "Numeric" } },
+          { "name": "rewards", "type": "u64" },
+          { "name": "lifetime_rewards", "type": "u64" },
+          { "name": "multiplier", "type": "u64" },
+          { "name": "lock_duration", "type": "i64" },
+          { "name": "executor", "type": "publicKey" },
+          { "name": "created_at", "type": "i64" },
+          { "name": "is_nft_staked", "type": "u8" },
+          { "name": "buffer", "type": { "array": ["u8", 31] } }
+        ]
+      }
+    },
+    {
+      "name": "Round",
+      "discriminator": [109, 0, 0, 0, 0, 0, 0, 0],
+      "docs": ["State for a single mining round."],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "id", "type": "u64" },
+          { "name": "deployed", "type": { "array": ["u64", 25] } },
+          { "name": "slot_hash", "type": { "array": ["u8", 32] } },
+          { "name": "count", "type": { "array": ["u64", 25] } },
+          { "name": "expires_at", "type": "u64" },
+          { "name": "motherlode", "type": "u64" },
+          { "name": "rent_payer", "type": "publicKey" },
+          { "name": "top_miner", "type": "publicKey" },
+          { "name": "top_miner_reward", "type": "u64" },
+          { "name": "total_deployed", "type": "u64" },
+          { "name": "total_vaulted", "type": "u64" },
+          { "name": "total_winnings", "type": "u64" }
+        ]
+      }
+    },
+    {
+      "name": "Referrer",
+      "discriminator": [110, 0, 0, 0, 0, 0, 0, 0],
+      "docs": ["State for a referrer participating in the program."],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "authority", "type": "publicKey" },
+          { "name": "rewards_sol", "type": "u64" },
+          { "name": "rewards_godl", "type": "u64" },
+          { "name": "cumulative_rewards_sol", "type": "u64" },
+          { "name": "cumulative_rewards_godl", "type": "u64" },
+          { "name": "referrer_count", "type": "u64" }
+        ]
+      }
+    },
+    {
+      "name": "SolMotherlode",
+      "discriminator": [112, 0, 0, 0, 0, 0, 0, 0],
+      "docs": ["Tracks SOL allocated to the motherlode rewards pool."],
+      "type": {
+        "kind": "struct",
+        "fields": [{ "name": "amount", "type": "u64" }]
+      }
+    },
+    {
+      "name": "PoolRound",
+      "discriminator": [113, 0, 0, 0, 0, 0, 0, 0],
+      "docs": ["Aggregated deposits for pooled miners per round."],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "id", "type": "u64" },
+          { "name": "deployed", "type": { "array": ["u64", 25] } },
+          { "name": "count", "type": { "array": ["u64", 25] } },
+          { "name": "claimed_deployed", "type": { "array": ["u64", 25] } },
+          { "name": "claimed_rewards", "type": { "array": ["u64", 25] } },
+          { "name": "total_deployed", "type": "u64" },
+          { "name": "rent_payer", "type": "publicKey" }
+        ]
+      }
+    },
+    {
+      "name": "PoolMember",
+      "discriminator": [114, 0, 0, 0, 0, 0, 0, 0],
+      "docs": ["Tracks per-authority participation in the mining pool."],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "authority", "type": "publicKey" },
+          { "name": "round_id", "type": "u64" },
+          { "name": "deployed", "type": { "array": ["u64", 25] } },
+          { "name": "total_deployed", "type": "u64" }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "Numeric",
+      "docs": ["Fixed-point helper backed by I80F48 from the steel crate."],
+      "type": {
+        "kind": "struct",
+        "fields": [{ "name": "bits", "type": { "array": ["u8", 16] } }]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "ResetEvent",
+      "discriminator": [0, 0, 0, 0, 0, 0, 0, 0],
+      "fields": [
+        { "name": "disc", "type": "u64", "index": false },
+        { "name": "round_id", "type": "u64", "index": false },
+        { "name": "start_slot", "type": "u64", "index": false },
+        { "name": "end_slot", "type": "u64", "index": false },
+        { "name": "winning_square", "type": "u64", "index": false },
+        { "name": "top_miner", "type": "publicKey", "index": false },
+        { "name": "num_winners", "type": "u64", "index": false },
+        { "name": "motherlode", "type": "u64", "index": false },
+        { "name": "total_deployed", "type": "u64", "index": false },
+        { "name": "total_vaulted", "type": "u64", "index": false },
+        { "name": "total_winnings", "type": "u64", "index": false },
+        { "name": "total_minted", "type": "u64", "index": false },
+        { "name": "ts", "type": "i64", "index": false }
+      ]
+    },
+    {
+      "name": "BuryEvent",
+      "discriminator": [1, 0, 0, 0, 0, 0, 0, 0],
+      "fields": [
+        { "name": "disc", "type": "u64", "index": false },
+        { "name": "godl_buried", "type": "u64", "index": false },
+        { "name": "godl_shared", "type": "u64", "index": false },
+        { "name": "sol_amount", "type": "u64", "index": false },
+        { "name": "new_circulating_supply", "type": "u64", "index": false },
+        { "name": "ts", "type": "i64", "index": false }
+      ]
+    },
+    {
+      "name": "DeployEvent",
+      "discriminator": [2, 0, 0, 0, 0, 0, 0, 0],
+      "fields": [
+        { "name": "disc", "type": "u64", "index": false },
+        { "name": "authority", "type": "publicKey", "index": false },
+        { "name": "amount", "type": "u64", "index": false },
+        { "name": "mask", "type": "u64", "index": false },
+        { "name": "round_id", "type": "u64", "index": false },
+        { "name": "ts", "type": "i64", "index": false }
+      ]
+    }
+  ],
+  "errors": [
+    { "code": 0, "name": "AmountTooSmall", "msg": "Amount too small" },
+    { "code": 1, "name": "NotAuthorized", "msg": "Not authorized" },
+    {
+      "code": 2,
+      "name": "InvalidReferrerAccount",
+      "msg": "Invalid referrer account"
+    },
+    {
+      "code": 3,
+      "name": "InvalidLockDuration",
+      "msg": "Invalid lock duration"
+    },
+    { "code": 4, "name": "StakeLocked", "msg": "Stake is locked" },
+    { "code": 5, "name": "StakeUnlocked", "msg": "Stake is locked" },
+    {
+      "code": 6,
+      "name": "StakeV2NotReleased",
+      "msg": "Stake V2 is not released yet"
+    },
+    { "code": 7, "name": "StakeOverflow", "msg": "Stake amount too large" },
+    {
+      "code": 8,
+      "name": "AlreadyDeployedThisRound",
+      "msg": "Miner has already deployed in this round"
+    },
+    {
+      "code": 9,
+      "name": "StakeAlreadyExists",
+      "msg": "Stake account already exists"
+    },
+    {
+      "code": 10,
+      "name": "NftAlreadyStaked",
+      "msg": "NFT already staked to this account"
+    },
+    {
+      "code": 11,
+      "name": "NftNotStaked",
+      "msg": "No NFT staked to this account"
+    },
+    {
+      "code": 12,
+      "name": "InvalidCollection",
+      "msg": "NFT does not belong to the required collection"
+    }
+  ],
+  "metadata": {
+    "address": "mineWsRs2Rmw2jPMkVbgAbDjV1E23yQ8TEodaX3iza4",
+    "origin": "steel"
+  }
+}
