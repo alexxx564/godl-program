@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["api", "program", "cli", "scripts", "vendor/jupiter-swap-api-client"]
+members = ["api", "program", "cli", "vendor/jupiter-swap-api-client"]
 
 [workspace.package]
 version = "3.7.5"
