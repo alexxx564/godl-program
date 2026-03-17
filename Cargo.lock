@@ -1365,7 +1365,8 @@ dependencies = [
 
 [[package]]
 name = "entropy-api"
-version = "3.7.5"
+version = "0.1.4"
+source = "git+https://github.com/oxapo11o/entropy-program.git#1c172fcc6cd05786304b4bdd31eaba526c60c647"
 dependencies = [
  "bytemuck",
  "num_enum",

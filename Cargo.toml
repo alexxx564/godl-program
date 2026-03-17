@@ -19,7 +19,7 @@ bytemuck = "1.14.3"
 bytemuck_derive = "1.7.0"
 const-crypto = "0.1.0"
 dotenvy = "0.15"
-entropy-api = { path = "./entropy-program/api" }
+entropy-api = { git = "https://github.com/oxapo11o/entropy-program.git" }
 entropy-types = "0.0.1"
 mpl-core = "0.11"
 mpl-token-metadata = "5.1"
