@@ -1,0 +1,608 @@
+# GODL — Agent Skill (Solana Mainnet)
+
+> **Chain:** Solana (mainnet-beta)
+> **App:** https://godl.supply
+> **Stream API:** https://stream.godl.dev
+> **WebSocket:** wss://stream.godl.dev/stream
+> **Objective:** Deploy SOL to a 5x5 grid in slot-based rounds. Entropy program picks a winning square. Winners split the pool. Earn SOL + GODL rewards. Stake GODL for yield.
+
+---
+
+## Setup
+
+```bash
+npm i @zenx-labs/godl-supply
+```
+
+```typescript
+import { GodlSupply } from '@zenx-labs/godl-supply'
+
+// Load signer from a keypair.json file (Solana CLI format)
+const sdk = await GodlSupply.create('~/.config/solana/id.json', {
+  rpcUrl: 'https://your-rpc.com', // optional, defaults to public mainnet
+})
+```
+
+---
+
+## Addresses
+
+| Account        | Address                                        |
+| -------------- | ---------------------------------------------- |
+| Program        | `mineWsRs2Rmw2jPMkVbgAbDjV1E23yQ8TEodaX3iza4`  |
+| GODL Mint      | `GodL6KZ9uuUoQwELggtVzQkKmU1LfqmDokPibPeDKkhF` |
+| Entropy        | `rngJSm78htuZREU5F3tb3JKnYSaPx1nMHZxyvNNFmxy`  |
+| Executor (Bot) | `botHfLbBG8oSrohhfCF63xj3LhpBjJrYQkyE27gA4rN`  |
+| NFT Collection | `DTzRfkhPq73e1m3Fwu7AMPie5aNWwMGQMMxgdBhGATgY` |
+
+All SOL amounts are in lamports (1 SOL = 1,000,000,000 lamports). GODL token uses 11 decimals.
+
+---
+
+## Data Model
+
+| Constant          | Value                 | Note                                              |
+| ----------------- | --------------------- | ------------------------------------------------- |
+| GODL_DECIMALS     | 11                    | GODL token decimals                               |
+| GRID_SIZE         | 25 (5x5)              | Square IDs 0–24                                   |
+| ROUND_DURATION    | Slot-based            | Defined by `board.startSlot` to `board.endSlot`   |
+| SLOT_DURATION     | ~400ms                | Solana slot time                                  |
+| AUTOMATION_FEE    | 30,000 lamports/round | Per-round fee for autominer                       |
+| CACHE_TTL         | 15 seconds            | In-memory cache expiry for account data           |
+| Deploys per round | 1 per user            | Checkpoint required if `checkpointId !== roundId` |
+
+---
+
+## How the Game Works
+
+### Round Lifecycle
+
+```
+Board (startSlot → endSlot) → reset → Entropy VRF → ResetEvent (winningSquare) → next round
+```
+
+1. A round starts at `board.startSlot` and runs until `board.endSlot`.
+2. Call `deploy()` with SOL — it's spread across your chosen squares on the 5x5 grid.
+3. After `endSlot`, the backend calls `reset()`.
+4. The Entropy program (`rngJSm78...`) provides VRF randomness to determine the winning square (0–24).
+5. A `ResetEvent` is emitted with the winning square, winners, payouts, and GODL minted.
+6. Next round starts immediately.
+
+### SOL Rewards
+
+Winners are all miners who deployed to the winning square. The pool (minus fees) is split proportionally based on each winner's SOL deployed to that square.
+
+Key fields from `ResetEvent`:
+
+- `winningSquare` — which square won (0–24)
+- `numWinners` — count of winning miners
+- `totalDeployed` — total SOL in the round
+- `totalVaulted` — amount sent to treasury vault
+- `totalWinnings` — amount distributed to winners
+- `topMiner` — address of highest deployer on winning square
+- `topMinerReward` — bonus for top miner
+- `motherlode` — jackpot amount (if triggered)
+
+### GODL Rewards
+
+GODL tokens are minted each round (`totalMinted` in `ResetEvent`). The `config.godlPerRound` field defines the mint rate. Rewards accumulate in the miner account (`rewardsGodl`) and must be claimed separately.
+
+### Motherlode (Jackpot)
+
+The treasury has a `motherlode` field that accumulates over rounds. When triggered, the entire motherlode pays out to winners. The `solMotherlode` tracks the SOL jackpot value. Check via `sdk.on('solMotherlode', ...)` or the `treasury.motherlode` field.
+
+### Checkpoint Mechanic
+
+Before deploying to a new round, miners must checkpoint their previous round if `miner.checkpointId !== miner.roundId`. The SDK handles this automatically — `deploy()` and `claim()` prepend a checkpoint instruction when needed.
+
+### Referral System
+
+Miners have a `referrer` field. When claiming SOL or GODL, a share goes to the referrer. Invalid referrers (`11111111111111111111111111111111` or `JEKNVnkbo3jma5nREBBJCDoXFVeKkD56V3xKrvRmWxFG`) are filtered out automatically by the SDK.
+
+---
+
+## SDK API
+
+### Initialization
+
+```typescript
+import { GodlSupply } from '@zenx-labs/godl-supply'
+
+// Load signer from a keypair.json file and create the client
+const sdk = await GodlSupply.create('~/.config/solana/id.json', {
+  rpcUrl: 'https://your-rpc.com', // optional
+  wsUrl: 'wss://stream.godl.dev/stream', // optional (default)
+  streamApiUrl: 'https://stream.godl.dev', // optional (default)
+  commitment: 'confirmed', // optional (default)
+})
+```
+
+### Lifecycle
+
+```typescript
+await sdk.connect() // Connect WebSocket, fetch init data, sync slot
+sdk.disconnect() // Disconnect, stop slot tracker, clear cache
+sdk.isConnected // boolean
+```
+
+### Real-Time Events
+
+```typescript
+const unsub = sdk.on('board', (board) => { ... })
+unsub() // or sdk.off('board', handler)
+```
+
+| Event           | Type            | Description                                        |
+| --------------- | --------------- | -------------------------------------------------- |
+| `board`         | `Board`         | Round boundaries (roundId, startSlot, endSlot)     |
+| `round`         | `Round`         | Grid state: deployed[25], count[25], totals        |
+| `resetEvent`    | `ResetEvent`    | Round result: winningSquare, winners, payouts      |
+| `treasury`      | `Treasury`      | Treasury balances, reward factors, staking totals  |
+| `miner`         | `Miner`         | Your miner account (deployed, rewards, checkpoint) |
+| `automation`    | `Automation`    | Your autominer config and balance                  |
+| `slotData`      | `SlotData`      | Slot sync from server                              |
+| `solMotherlode` | `SolMotherlode` | Current SOL jackpot amount                         |
+| `poolMember`    | `PoolMember`    | Your pool membership data                          |
+| `poolRound`     | `PoolRound`     | Pool round deployments                             |
+| `slotTick`      | `bigint`        | Emitted every ~400ms with estimated slot           |
+| `connected`     | `boolean`       | WebSocket connection state                         |
+| `error`         | `Error`         | WebSocket errors                                   |
+
+### Slot Tracking
+
+```typescript
+const currentSlot = sdk.getSlot() // bigint
+
+const unsub = sdk.onSlotTick((slot) => {
+  // fires every ~400ms
+  const board = await sdk.getBoard()
+  const remaining = board.endSlot - slot
+  console.log('Slots remaining:', remaining)
+})
+```
+
+### Account Getters
+
+All getters use a two-tier cache (WebSocket → 15s in-memory cache → stream API / RPC fallback).
+
+```typescript
+// Global state
+const board = await sdk.getBoard() // Board { roundId, startSlot, endSlot }
+const treasury = await sdk.getTreasury() // Treasury { balance, motherlode, totalStaked, ... }
+const config = await sdk.getConfig() // Config { admin, godlPerRound, varAddress, ... }
+
+// Per-user (defaults to signer if authority omitted)
+const miner = await sdk.getMiner() // throws if not found
+const miner2 = await sdk.getMiner('SomePubkey...') // other user's miner
+const automation = await sdk.getAutomation() // null if not set up
+const stake = await sdk.getStake() // V1 stake
+const stakeV2 = await sdk.getStakeV2(0n) // V2 stake by ID
+const allStakes = await sdk.getStakeV2Accounts() // all V2 stakes
+
+// Round data
+const round = await sdk.getRound(42n) // null if not found
+const poolRound = await sdk.getPoolRound(42n) // null if not found
+
+// Pool & referral
+const poolMember = await sdk.getPoolMember() // null if not a member
+const referrer = await sdk.getReferrer() // null if not a referrer
+```
+
+---
+
+## Operations
+
+### Deploy (Mine)
+
+Deploy SOL to selected squares on the 5x5 grid. Automatically checkpoints previous round if needed.
+
+**`amount` is lamports per square.** Total SOL spent = `amount × squares.length`.
+
+```typescript
+const txSig = await sdk.deploy({
+  amount: 1_000_000, // lamports PER SQUARE (total = 1_000_000 × 5 = 5_000_000 lamports)
+  squares: [0, 5, 12, 18, 24], // square indices (0–24)
+  varAddress: address('EntropyVarAddr...'), // entropy variable address
+  isPooled: false, // optional, default: false
+})
+```
+
+**Square encoding:** Internally converted to a bitmask (`mask |= 1 << squareIndex`).
+
+### Claim Rewards
+
+```typescript
+// Claim SOL rewards
+const txSig = await sdk.claim({ claimSol: true })
+
+// Claim GODL rewards (creates ATA if needed)
+const txSig = await sdk.claim({ claimGodl: true })
+
+// Claim both
+const txSig = await sdk.claim({ claimSol: true, claimGodl: true })
+```
+
+Throws `'No claim instructions specified'` if neither flag is set.
+
+### Autominer
+
+Set up automated mining that runs for N rounds without manual intervention.
+
+```typescript
+// Strategy 1: specific squares (bitmask)
+const txSig = await sdk.setupAutominer({
+  amount: 500_000, // lamports per round
+  deposit: 5_000_000, // total SOL funding
+  squares: [0, 5, 12, 18, 24], // target squares
+  strategy: 1, // 1 = specific squares
+  numRounds: 10, // number of rounds
+  claimAndFund: false, // optional
+  isPooled: false, // optional
+})
+
+// Strategy 2: random squares
+const txSig = await sdk.setupAutominer({
+  amount: 500_000,
+  deposit: 5_000_000,
+  squares: [5], // [count] — deploy to 5 random squares
+  strategy: 2, // 2 = random
+  numRounds: 10,
+})
+
+// Fund more SOL into existing automation
+const txSig = await sdk.fundAutomation(2_000_000n) // lamports
+
+// Stop and refund remaining
+const txSig = await sdk.stopAutominer()
+```
+
+**Cost per round:** `amount + 30,000 lamports (AUTOMATION_FEE)`
+**Total deposit:** `deposit + AUTOMATION_FEE * numRounds`
+
+### Staking V1 (Legacy)
+
+```typescript
+const txSig = await sdk.stakeDeposit(1_000_000_000n) // GODL amount
+const txSig = await sdk.stakeWithdraw(500_000_000n)
+const txSig = await sdk.stakeClaimYield(100_000_000n)
+```
+
+### Staking V2 (Current)
+
+Supports lock durations, multipliers, NFT boosts, and executor delegation.
+
+```typescript
+// Deposit with lock duration
+const txSig = await sdk.stakeV2Deposit(
+  0n, // stake position ID
+  1_000_000_000n, // GODL amount
+  30n, // lock duration (seconds)
+)
+
+// Withdraw (after lock expires)
+const txSig = await sdk.stakeV2Withdraw(0n, 500_000_000n)
+
+// Claim yield
+const txSig = await sdk.stakeV2ClaimYield(0n, 100_000_000n)
+
+// Compound yield back into stake
+const txSig = await sdk.stakeV2CompoundYield(0n)
+
+// Delegate yield harvesting to an executor
+const txSig = await sdk.setStakeExecutor(0n, address('executor...'))
+
+// NFT boost (from collection DTzRfk...)
+const txSig = await sdk.stakeNft(0n, address('nftAsset...'))
+const txSig = await sdk.unstakeNft(0n, address('nftAsset...'))
+```
+
+**StakeV2 fields:**
+
+- `multiplier` — APY multiplier based on lock duration
+- `lockDuration` — lock period in seconds
+- `isNftStaked` — 0 or 1, NFT boost active
+- `executor` — delegated yield harvester address
+
+---
+
+## Data Structures
+
+### Board
+
+```typescript
+{
+  roundId: bigint // current round ID
+  startSlot: bigint // round start slot
+  endSlot: bigint // round end slot
+}
+```
+
+### Round
+
+```typescript
+{
+  id: bigint
+  deployed: bigint[]      // 25 elements — SOL per square
+  count: bigint[]         // 25 elements — miner count per square
+  slotHash: Uint8Array    // 32 bytes
+  expiresAt: bigint
+  motherlode: bigint
+  rentPayer: string
+  topMiner: string
+  topMinerReward: bigint
+  totalDeployed: bigint
+  totalVaulted: bigint
+  totalWinnings: bigint
+}
+```
+
+### Miner
+
+```typescript
+{
+  authority: string
+  referrer: string
+  deployed: bigint[]       // 25 elements — your SOL per square this round
+  cumulative: bigint[]     // 25 elements — lifetime per square
+  checkpointFee: bigint
+  checkpointId: bigint     // last checkpointed round
+  roundId: bigint          // current round
+  rewardsSol: bigint       // pending SOL
+  rewardsGodl: bigint      // pending GODL
+  refinedGodl: bigint
+  lifetimeDeployed: bigint
+  lifetimeRewardsSol: bigint
+  lifetimeRewardsGodl: bigint
+  isPoolMember?: boolean
+}
+```
+
+### Treasury
+
+```typescript
+{
+  balance: bigint
+  motherlode: bigint
+  minerRewardsFactor: Uint8Array // 16 bytes
+  stakeRewardsFactor: Uint8Array // 16 bytes
+  totalStaked: bigint
+  totalUnclaimed: bigint
+  totalRefined: bigint
+}
+```
+
+### ResetEvent
+
+```typescript
+{
+  disc: bigint
+  roundId: bigint
+  startSlot: bigint
+  endSlot: bigint
+  winningSquare: bigint // 0–24
+  topMiner: string
+  numWinners: bigint
+  motherlode: bigint // jackpot payout (0 if not triggered)
+  totalDeployed: bigint
+  totalVaulted: bigint
+  totalWinnings: bigint
+  totalMinted: bigint // GODL minted this round
+  timestamp: bigint
+}
+```
+
+### Automation
+
+```typescript
+{
+  authority: string
+  amount: bigint // SOL per round
+  balance: bigint // remaining deposit
+  executor: string // bot address
+  fee: bigint // fee per round
+  config: bigint // encoded strategy config
+  mask: bigint // square bitmask (strategy 1) or count (strategy 2)
+}
+```
+
+### StakeV2
+
+```typescript
+{
+  id: bigint
+  authority: string
+  balance: bigint
+  rewards: bigint
+  lifetimeRewards: bigint
+  multiplier: bigint // APY multiplier from lock
+  lockDuration: bigint // lock period (seconds)
+  executor: string // delegated harvester
+  isNftStaked: number // 0 or 1
+  createdAt: bigint
+}
+```
+
+### Config
+
+```typescript
+{
+  admin: string
+  godlPerRound: bigint // GODL minted per round
+  buryAuthority: string
+  feeCollector: string
+  swapProgram: string
+  varAddress: string // entropy variable address
+  buffer: bigint
+}
+```
+
+---
+
+## WebSocket Protocol
+
+**URL:** `wss://stream.godl.dev/stream`
+
+**Message format:** Binary. First byte = discriminator, remaining bytes = MessagePack (BigInt64 mode).
+
+| Discriminator | Type           | Description                |
+| ------------- | -------------- | -------------------------- |
+| 0             | RESET_EVENT    | Round settled with results |
+| 1             | ROUND          | Grid state update          |
+| 2             | MINER          | Miner account update       |
+| 3             | WINNING_MINERS | Winners list               |
+| 5             | BOARD          | Round boundaries           |
+| 6             | SLOT_DATA      | Slot synchronization       |
+| 7             | TREASURY       | Treasury state             |
+| 8             | AUTOMATION     | Automation V1 update       |
+| 10            | AUTOMATION_V2  | Automation V2 update       |
+| 11            | SOL_MOTHERLODE | Jackpot amount             |
+| 12            | POOL_MEMBER    | Pool membership update     |
+| 13            | POOL_ROUND     | Pool round update          |
+
+**Auto-subscribed topics on connect:**
+
+- `board`, `round`, `slot`, `treasury`, `sol_motherlode`, `pool_round`, `reset`
+- Per-user: `miner:{authority}`, `automation_v2:{authority}`, `pool_member:{authority}`
+
+**Reconnection:** Max 10 attempts, 3-second intervals.
+
+---
+
+## Stream API
+
+**Base URL:** `https://stream.godl.dev`
+
+### Init Data
+
+```
+GET /api/init-data
+```
+
+Returns base64-encoded MessagePack for all accounts needed to bootstrap the client:
+
+- `board`, `round`, `treasury`, `slotData`, `solMotherlode`, `poolRound`
+- `lastMotherlodeRoundId` (nullable)
+
+The SDK calls this automatically on `connect()`.
+
+---
+
+## PDA Derivation
+
+All PDAs use `GODL_PROGRAM_ID` as the program. Seeds:
+
+| Account       | Seeds                                  |
+| ------------- | -------------------------------------- |
+| Board         | `"board"`                              |
+| Treasury      | `"treasury"`                           |
+| Config        | `"config"`                             |
+| SolMotherlode | `"sol_motherlode"`                     |
+| Round         | `"round"` + roundId (u64 LE)           |
+| Miner         | `"miner"` + authority (32 bytes)       |
+| Automation    | `"automation_v2"` + authority          |
+| Stake V1      | `"stake"` + authority                  |
+| Stake V2      | `"stake_v2"` + authority + id (u64 LE) |
+| PoolRound     | `"pool_round"` + roundId (u64 LE)      |
+| PoolMember    | `"pool_member"` + authority            |
+| Referrer      | `"referrer"` + authority               |
+
+```typescript
+import {
+  getBoardPda,
+  getTreasuryPda,
+  getConfigPda,
+  getRoundPda,
+  getMinerPda,
+  getAutomationPda,
+  getStakePda,
+  getStakeV2Pda,
+  getPoolRoundPda,
+  getPoolMemberPda,
+  getGodlAta,
+} from '@zenx-labs/godl-supply'
+
+const [boardKey, bump] = getBoardPda()
+const [minerKey, bump] = getMinerPda(publicKey)
+const ata = await getGodlAta(address('owner...'))
+```
+
+---
+
+## Error Codes
+
+| Code  | Name             | Message          |
+| ----- | ---------------- | ---------------- |
+| `0x0` | AMOUNT_TOO_SMALL | Amount too small |
+| `0x1` | NOT_AUTHORIZED   | Not authorized   |
+
+---
+
+## Strategy
+
+### Square Selection
+
+All 25 squares have **equal win probability** — the Entropy VRF is uniform random (`winningSquare = VRF % 25`). Strategy is about share of the winning square, not odds.
+
+- **Fewer squares** (1–3): Higher variance, larger share if you win.
+- **More squares** (10–25): Higher win rate, smaller per-square reward.
+- **Read the grid**: Watch `round` events via WebSocket. Deploy to **less crowded squares** for a larger proportional share.
+- **Empty squares**: If you're the only miner on a square and it wins, you take the entire winner's share.
+
+### Timing
+
+Rounds are slot-based (not wall-clock). Use `sdk.getSlot()` and `board.endSlot` to track remaining time.
+
+```typescript
+const board = await sdk.getBoard()
+const currentSlot = sdk.getSlot()
+const slotsRemaining = board.endSlot - currentSlot
+const secondsRemaining = Number(slotsRemaining) * 0.4 // ~400ms per slot
+```
+
+- **Deploy early**: Others see your position in real-time and may counter.
+- **Deploy late**: Less counter-play, but risk missing the round if your tx doesn't confirm.
+- **Reactive**: Watch grid state for most of the round, then deploy to least-crowded squares.
+
+### Motherlode
+
+Monitor `solMotherlode` and `treasury.motherlode` events. A large motherlode increases the EV of every round significantly. When the motherlode is high, it's worth deploying even small amounts for jackpot exposure.
+
+### GODL Management
+
+1. **Claim GODL**: Call `sdk.claim({ claimGodl: true })`. Creates ATA automatically.
+2. **Stake V2**: Lock GODL for yield with a multiplier based on lock duration.
+3. **Compound**: `sdk.stakeV2CompoundYield(id)` — reinvest yield.
+4. **NFT boost**: Stake an NFT from collection `DTzRfk...` for additional APY.
+5. **Executor**: Delegate yield harvesting to a bot with `setStakeExecutor()`.
+
+### AutoMiner vs Manual
+
+|            | Manual                                | AutoMiner                      |
+| ---------- | ------------------------------------- | ------------------------------ |
+| Control    | Full (choose squares, amount, timing) | Preset strategy                |
+| Cost       | Solana tx fee (~5000 lamports)        | 30,000 lamports/round + tx fee |
+| Strategies | Reactive to grid state                | 1 = fixed squares, 2 = random  |
+| Best for   | Active play, grid reading             | Passive play, guaranteed entry |
+
+---
+
+## Agent Workflow
+
+```
+1. INITIALISE
+   npm i @zenx-labs/godl-supply
+
+   const sdk = await GodlSupply.create("~/.config/solana/id.json", { rpcUrl })
+   await sdk.connect()
+
+   const board    = await sdk.getBoard()       // current round
+   const treasury = await sdk.getTreasury()    // balances, motherlode, staking
+   const config   = await sdk.getConfig()      // godlPerRound, varAddress
+
+   // Listen for real-time updates
+   sdk.on('round', (round) => { ... })         // grid state
+   sdk.on('resetEvent', (event) => { ... })    // round results
+   sdk.on('solMotherlode', (m) => { ... })     // jackpot tracking
+
+2. EACH ROUND (slot-based, ~seconds)
+   a. Observe: 'r
